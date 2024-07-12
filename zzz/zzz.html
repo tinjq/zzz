@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/crypto-js.min.js"></script>
+    <script src="zcommon.js"></script>
+    <script src="zzz.txt"></script>
+    <style>
+        a { text-decoration: none; margin: 0 2px; }
+        input { margin: 2px 0; width:300px;}
+        button { margin: 0 2px; }
+    </style>
+</head>
+
+<body>
+    <input type="password" id="password" autofocus>
+    <button class="btnSubmit">Submit</button><br>
+    <div class="show" style="display:none;">
+        <div>
+            <input type="text" id="content">
+            <button id="btnAppend">Append</button>
+            <button id="btnSave">Save</button>
+        </div>
+        <h3>
+            <ol id="list"></ol>
+        </h3>
+    </div>
+
+    <script>
+        let password = '';
+        let passInput = document.querySelector('#password')
+        let btnSubmit = document.querySelector('.btnSubmit')
+        let show = document.querySelector('.show')
+        let contentInput = document.querySelector('#content')
+        let btnAppend = document.querySelector('#btnAppend')
+        let btnSave = document.querySelector('#btnSave')
+        let list = document.querySelector('#list')
+
+        btnSubmit.onclick = function () {
+            show.style.display = 'block'
+            password = passInput.value
+            for (let item of arr) {
+                let msg = decrypt(item, password);
+                list.appendChild(getListItem(msg))
+            }
+        }
+
+        btnAppend.onclick = function () {
+            let contentVal = contentInput.value
+            if (contentVal) {
+                let ciphertext = encrypt(contentVal, password)
+                arr.push(ciphertext);
+                list.appendChild(getListItem(contentVal))
+            }
+        }
+
+        function addPrev() {
+            let contentVal = contentInput.value
+            if (contentVal) {
+                let liArr = Array.from(list.querySelectorAll('li'))
+                let li = this.parentNode
+                let index = liArr.indexOf(li)
+
+                let ciphertext = encrypt(contentVal, password)
+                arr.splice(index, 0, ciphertext)
+
+                const newNode = getListItem(contentVal);
+                list.insertBefore(newNode, li);
+            }
+        }
+
+        function deleteThis() {
+            let liArr = Array.from(list.querySelectorAll('li'))
+            let li = this.parentNode
+            arr.splice(liArr.indexOf(li), 1)
+            li.remove()
+        }
+
+        btnSave.onclick = function () {
+            let passVal = passInput.value
+            let saveContent = ''
+            if (passVal !== password) {
+                if (confirm('Do you want to save with a new pass?')) {
+                    let newArr = Array.from(document.querySelectorAll('li>a'))
+                        .map(item => encrypt(item.innerText, passVal))
+                    saveContent = JSON.stringify(newArr, null, 2)
+                }
+            } else {
+                saveContent = JSON.stringify(arr, null, 2)
+            }
+            if (saveContent) {
+                saveContent = 'let arr = ' + saveContent
+                saveTxt('zzz', saveContent)
+            }
+        }
+
+        function getListItem(msg) {
+            let btnAdd = document.createElement('button')
+            btnAdd.innerText = '+'
+            btnAdd.onclick = addPrev
+
+            let btnDel = document.createElement('button')
+            btnDel.innerText = '-'
+            btnDel.onclick = deleteThis
+
+            let href = document.createElement('a')
+            href.href = msg
+            href.target = '_Blank'
+            href.innerText = msg
+
+            let li = document.createElement('li')
+            li.append(btnAdd, btnDel, href)
+
+            return li
+        }
+
+        document.onkeydown = function (event) {
+            var e = event || window.event || arguments.callee.caller.arguments[0]
+            if (e && e.keyCode === 13) {
+                if (passInput === document.activeElement) {
+                    btnSubmit.click();
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

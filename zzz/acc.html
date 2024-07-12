@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/crypto-js.min.js"></script>
+    <script src="zcommon.js"></script>
+    <script src="acc.txt"></script>
+    <style>
+        .content {display: none;}
+        .star {display: inline-block; vertical-align: middle}
+        li:hover {background-color: #e3e3e3}
+        li:hover .content {display: inline-block;}
+        li:hover .star {display: none;}
+        input { margin: 2px 0; width:300px;}
+        button { margin: 0 2px; }
+    </style>
+</head>
+
+<body>
+    <input type="password" id="password" autofocus>
+    <button class="btnSubmit">Submit</button><br>
+    <div class="show" style="display:none;">
+        <div>
+            <input type="text" id="name" placeholder="name"><br>
+            <input type="text" id="content" placeholder="content">
+            <button id="btnAppend">Append</button>
+            <button id="btnSave">Save</button>
+        </div>
+        <h3>
+            <ol id="list"></ol>
+        </h3>
+    </div>
+
+    <script>
+        const passInput = document.querySelector('#password')
+        const btnSubmit = document.querySelector('.btnSubmit')
+        const show = document.querySelector('.show')
+        const nameInput = document.querySelector('#name')
+        const contentInput = document.querySelector('#content')
+        const btnAppend = document.querySelector('#btnAppend')
+        const btnSave = document.querySelector('#btnSave')
+        const list = document.querySelector('#list')
+        let password = ''
+
+        btnSubmit.onclick = function () {
+            show.style.display = 'block'
+            password = passInput.value
+
+            let name = ''
+            let msg = ''
+            for (let item of arr) {
+                name = decrypt(item.name, password)
+                msg = decrypt(item.content, password)
+                list.appendChild(getListItem(name, msg))
+            }
+        }
+
+        function getListItem(name, msg) {
+            let li = document.createElement('li')
+            li.innerHTML = '<button onclick="addPrev(this)">+</button><button onclick="deleteThis(this)">-</button><span class="name">' 
+                + name + '</span>: <span class="content">' + msg + '</span><span class="star">******</span>'
+            return li
+        }
+
+        btnAppend.onclick = function () {
+            let nameVal = nameInput.value
+            let contentVal = contentInput.value
+            if (contentVal) {
+                let cipherName = encrypt(nameVal, password)
+                let cipherContent = encrypt(contentVal, password)
+                arr.push({name: cipherName, content: cipherContent});
+                list.appendChild(getListItem(nameVal, contentVal))
+            }
+        }
+
+        function addPrev(_this) {
+            let nameVal = nameInput.value
+            let contentVal = contentInput.value
+            if (contentVal) {
+                let liArr = Array.from(list.querySelectorAll('li'))
+                let li = _this.parentNode
+                let index = liArr.indexOf(li)
+
+                let cipherName = encrypt(nameVal, password)
+                let cipherContent = encrypt(contentVal, password)
+                arr.splice(index, 0, {name: cipherName, content: cipherContent})
+
+                const newNode = getListItem(nameVal, contentVal);
+                list.insertBefore(newNode, li);
+            }
+        }
+
+        function deleteThis(_this) {
+            let liArr = Array.from(list.querySelectorAll('li'))
+            let li = _this.parentNode
+            arr.splice(liArr.indexOf(li), 1)
+            li.remove()
+        }
+
+        btnSave.onclick = function () {
+            let passVal = passInput.value
+            let saveContent = ''
+            if (passVal !== password) {
+                if (confirm('Do you want to save with a new pass?')) {
+                    let newArr = Array.from(document.querySelectorAll('li'))
+                        .map(item => {
+                            let name = item.querySelector('.name').innerText, content = item.querySelector('.content').innerText
+                            return {name: encrypt(name, passVal), content: encrypt(content, passVal)}
+                        })
+                    saveContent = JSON.stringify(newArr, null, 2)
+                }
+            } else {
+                saveContent = JSON.stringify(arr, null, 2)
+            }
+            if (saveContent) {
+                saveContent = 'let arr = ' + saveContent
+                saveTxt('acc', saveContent)
+            }
+        }
+
+        document.onkeydown = function (event) {
+            var e = event || window.event || arguments.callee.caller.arguments[0]
+            if (e && e.keyCode === 13) {
+                if (passInput === document.activeElement) {
+                    btnSubmit.click();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
