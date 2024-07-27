@@ -1,0 +1,220 @@
+* {
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: #f9f9f9;
+    line-height: 1.2rem;
+}
+
+ul {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: #282a2d;
+}
+
+aside {
+    width: 150px;
+    float: left;
+    position: fixed;
+    padding: 0 10px;
+    line-height: 2rem;
+    font-size: 0.8rem;
+}
+
+aside .iconfont, #content .iconfont {
+    font-size: 0.8rem;
+    margin-right: .3rem;
+}
+
+aside li a {
+    display: flex;
+    align-items: center;
+}
+
+aside li a:hover {
+    background-color: #d8d8d8;
+}
+
+aside li ul {
+    display: none;
+}
+
+aside li li {
+    padding-left: 1.1rem;
+}
+
+aside .title {
+    flex-grow: 1;
+}
+
+aside li.expanded ul {
+    display: block;
+}
+
+aside li.expanded .icon-right {
+    transform: rotate(90deg);
+}
+
+.nowrap-ellipsis {
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+main {
+    margin-left: 170px;
+    background-color: #d8d8d8;
+}
+
+#content {
+    padding: 15px;
+}
+
+#content h4 {
+    line-height: 2rem;
+    color: #5c5c5c
+}
+
+.site-cards {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -5px;
+    align-content: flex-start;
+}
+
+.site-cards>div {
+    width: 16.666%;
+}
+
+.site-card {
+    background-color: white;
+    margin: 0 5px 10px;
+    padding: 0.5rem;
+    border-radius: 3px;
+    position: relative;
+    border: 1px solid transparent;
+}
+
+.site-card:hover {
+    border-color: #FF6100
+}
+
+.site-card p:first-child {
+    font-size: 0.875rem
+}
+
+.site-card p:last-child {
+    font-size: 0.725rem
+}
+
+.footer-tools {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+}
+
+.rounded-circle {
+    border-radius: 50% !important;
+}
+
+.footer-tools>.rounded-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    background-color: #eee;
+    text-align: center;
+    line-height: 40px;
+    margin: .25rem;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+@media screen and (max-width:768px) {
+    .site-cards>div {
+        width: 50%;
+    }
+}
+
+@media screen and (max-width:1100px) and (min-width:768px) {
+    .site-cards>div {
+        width: 25%;
+    }
+}
+
+.hover-enlarge:hover {
+    color:blue;
+    font-size: 120%;
+}
+
+#content .iconfont:hover{
+    font-size: .9rem;
+}
+
+.site-card .edit-icons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: gray
+}
+
+input {
+    padding-left: 5px;
+}
+
+.marsk {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(221, 221, 221, 0.8);
+    display: none;
+}
+
+.popup {
+    max-width: 400px;
+    min-height: 100px;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transform: translateY(-50%);
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.popup div {
+    display: flex;
+    line-height: 1.5rem;
+    margin: .125rem 0;
+}
+
+.popup div input {
+    flex-grow: 1;
+    border: 1px solid black;
+}
+
+.popup button {
+    padding: 0 5px;
+    margin: 0 2px;
+}
+
+.popup .btns {
+    justify-content: center;
+    height: 1.5rem;
+}

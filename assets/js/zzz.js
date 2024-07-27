@@ -1,4 +1,9 @@
-async function saveTxt(filename, saveContent) {
+function getFileName() {
+    let fileName = document.querySelector('#data-js').src
+    return fileName.replace(/(.*\/)*([^.]+).*/ig,"$2");
+}
+
+async function saveTxt(filename, saveContent, successCallback, errorCallback) {
     try {
         const opts = {
             types: [
@@ -15,11 +20,23 @@ async function saveTxt(filename, saveContent) {
         await writable.write(saveContent)
         await writable.close()
 
-        console.log('save file success')
+        if (!successCallback) {
+            saveSuccess()
+        }
     } catch (error) {
-        console.error('save file faild:', error)
-        window.alert("save file faild:" + error)
+        if (!errorCallback) {
+            saveError(error)
+        }
     }
+}
+
+function saveSuccess() {
+    console.log('save file success')
+}
+
+function saveError(error) {
+    console.error('save file faild:', error)
+    window.alert("save file faild:" + error)
 }
 
 function encrypt(msg, key) {
