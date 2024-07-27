@@ -13,7 +13,7 @@
 
 <body>
 <div id="app">
-    <aside>
+    <aside v-if="menu">
         <ul>
             <li v-for="(item, i) in items" :key="item.title">
                 <a :href="`#${item.title + i}`" @click="expand($event)">
@@ -36,7 +36,18 @@
         </ul>
     </aside>
 
-    <main>
+    <nav :class="menu ? 'menu' : 'no-menu'">
+        <a @click="menu = !menu" class="left">
+            <i class="iconfont icon-category hover-enlarge"></i>
+        </a>
+        <a href="javascript:;" class="center">
+        </a>
+        <a href="https://github.com/tinjq/zzz" target="_blank">
+            <i class="iconfont icon-github hover-enlarge"></i>
+        </a>
+    </nav>
+    
+    <main :class="menu ? 'menu' : 'no-menu'">
         <div id="content">
             <div v-for="(item, i) in items" :key="item.title">
                 <h4 :id="item.title + i">{{item.title}}

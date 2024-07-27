@@ -31,8 +31,13 @@ createApp({
     setup() {
         const items = reactive(data.data)
         const editModel = ref(false)
+        const menu = ref(true)
         const editFlag = reactive({info: false, child: false, btns: false})
         const editData = reactive({ title: '', href: '', icon: '', description: '', i: -1, j: -1, k: -1 })
+
+        if (window.screen.width < 600) {
+            menu.value = false
+        }
         
         // 二级菜单展示隐藏
         function expand(e) {
@@ -221,7 +226,7 @@ createApp({
             saveTxt(getFileName(), saveContent)
         }
 
-        return { items, editModel, editFlag, editData, expand, editSite, closeMask, editUpdate, editDelete, 
+        return { items, editModel, menu, editFlag, editData, expand, editSite, closeMask, editUpdate, editDelete, 
             insertBefore, insertAfter, deleteMenu, appendChild,
             saveData }
     }

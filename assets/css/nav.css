@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     scroll-behavior: smooth;
+    scroll-padding-top: 3rem;
 }
 
 body {
@@ -69,11 +70,44 @@ aside li.expanded .icon-right {
 
 main {
     margin-left: 170px;
+    padding-top: 3rem;
     background-color: #d8d8d8;
 }
 
+main.no-menu {
+    margin-left: 0;
+}
+
+nav.no-menu  {
+    left: 0;
+}
+
+nav {
+    position: fixed;
+    left: 170px;
+    right: 0;
+    padding: 2px .5rem;
+    background-color: white;
+    z-index: 200;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .2);
+    line-height: 2rem;
+    display: flex;
+}
+
+nav a {
+    display: flex;
+}
+
+nav a.center {
+    flex-grow: 1;
+}
+
+nav a .iconfont{
+    margin: auto;
+}
+
 #content {
-    padding: 15px;
+    padding: .5rem;
 }
 
 #content h4 {
