@@ -13,7 +13,7 @@ let template = `
                   <li v-for="(child, j) in item.children" :key="child.title">
                       <a :href="'#' + child.title + i + j">
                           <i v-if="editModel" class="iconfont icon-delete hover-enlarge" @click="deleteMenu($event,i,j)"></i>
-                          <i v-if="editModel" class="iconfont icon-edit hover-enlarge" @click="editSite($event, false, true, true, i,j)"></i>
+                          <i v-if="editModel" class="iconfont icon-edit hover-enlarge" @click="editSite($event, false, false, true, i,j)"></i>
                           <span class="title nowrap-ellipsis">{{child.title}}</span>
                       </a>
                   </li>
