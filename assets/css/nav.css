@@ -226,7 +226,7 @@ input {
     overflow: hidden;
     background-color: #fff;
     border-radius: 5px;
-    padding: 10px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -251,4 +251,5 @@ input {
 .popup .btns {
     justify-content: center;
     height: 1.5rem;
+    margin-top: .5rem;
 }

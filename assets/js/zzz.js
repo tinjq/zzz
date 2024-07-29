@@ -1,4 +1,4 @@
-function getFileName() {
+function dataFileName() {
     let fileName = document.querySelector('#data-js').src
     return fileName.replace(/(.*\/)*([^.]+).*/ig,"$2");
 }

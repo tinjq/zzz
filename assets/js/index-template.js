@@ -41,7 +41,7 @@ let template = `
               </h4>
               <div v-if="item.sites && item.sites.length > 0" class="site-cards">
                   <div v-for="(site, j) in item.sites" :key="site.child">
-                      <div class="site-card">
+                      <div class="site-card" :data-tippy-content="site.description ? site.description : site.title" data-tippy-placement="bottom">
                           <a :href="site.href" target="_blank">
                               <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
                               <p class="nowrap-ellipsis">{{site.description}}</p>
@@ -60,7 +60,7 @@ let template = `
                   </h4>
                   <div class="site-cards">
                       <div v-for="(site, k) in child.sites" :key="site.title">
-                          <div class="site-card">
+                          <div class="site-card" :data-tippy-content="site.description ? site.description : site.title" data-tippy-placement="bottom">
                               <a :href="site.href" target="_blank">
                                   <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
                                   <p class="nowrap-ellipsis">{{site.description}}</p>
@@ -78,13 +78,13 @@ let template = `
       </div>
 
       <div class="footer-tools flex-column">
-          <a v-if="editModel" class="rounded-circle" title="保存至本地" @click="saveData">
+          <a v-show="editModel" class="rounded-circle" @click="saveData" data-tippy-content="修改后要保存，否则刷新页面就丢了" data-tippy-placement="left">
               <i class="iconfont icon-save hover-enlarge"></i>
           </a>
-          <a class="rounded-circle" title="切换修改模式" @click="editModel = !editModel">
+          <a class="rounded-circle" @click="editModel = !editModel" data-tippy-content="切换修改模式" data-tippy-placement="left">
               <i class="iconfont icon-edit hover-enlarge"></i>
           </a>
-          <a href="javascript:window.scrollTo({ top: 0 });" class="rounded-circle" title="回到顶部">
+          <a href="javascript:window.scrollTo({ top: 0 });" class="rounded-circle" data-tippy-content="回到顶部" data-tippy-placement="left">
               <i class="iconfont icon-to-up hover-enlarge"></i>
           </a>
       </div>

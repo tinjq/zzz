@@ -1,12 +1,47 @@
 /**
  * 导航页面js
  */
-
 if (!data || !data.data) {
-    var data = { encrypt: null, data: [{ title: "默认分类" }] }
+    var data = { encrypt: null, data: [{ title: "示例分类" }] }
 }
 
-const vue = function(decryptData, pass) {
+if (data.crypto) {
+    layer.prompt({ 
+        title: '请输入密码', 
+        formType: 1,
+        success: function(layero, index) {
+            const input = document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input')
+            input.addEventListener('keydown', function(e) {
+                if (e.keyCode === 13) {
+                    handlePrompt(input.value, index)
+                }
+            })
+        }
+    }, 
+    function(password, index) {
+        handlePrompt(password, index)
+    })
+} else {
+    vue(data.data)
+}
+
+function handlePrompt(password, index) {
+    if (password && password !== '') {
+        let decryptData = null
+        try {
+            decryptData = JSON.parse(decrypt(data.data, password))
+        } catch (error) {
+            console.log('密码不正确')
+            layer.msg('密码不正确')
+        }
+        if (decryptData) {
+            layer.closeAll();
+            vue(decryptData, password)
+        }
+    }
+}
+
+function vue(decryptData, pass) {
     const { createApp, ref, reactive, toRaw } = Vue
     const items = reactive(decryptData)
     const editModel = ref(false)
@@ -192,7 +227,10 @@ const vue = function(decryptData, pass) {
                             document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input').value = pass || ''
                         },
                         btn2: function(index, layero) {
-                            saveRaw(toRaw(items))
+                            delete data['crypto']
+                            data.data = toRaw(items)
+                            let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
+                            saveTxt(dataFileName(), saveContent)
                         }
                      }, 
                      function(password, index) {
@@ -207,7 +245,7 @@ const vue = function(decryptData, pass) {
                             layer.close(index);
                             data.crypto = 'AES'
                             let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
-                            saveTxt(getFileName(), saveContent)
+                            saveTxt(dataFileName(), saveContent)
                         }
                     })
                 }
@@ -215,52 +253,16 @@ const vue = function(decryptData, pass) {
         },
         template: template
     }).mount('#app')
+
+    tippyInit()
 }
 
-function saveRaw(rawItems) {
-    delete data['crypto']
-    data.data = rawItems
-    let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
-    saveTxt(getFileName(), saveContent)
-}
-
-// 加密数据提示输入密码
-const auth = function () {
-    if (data.crypto) {
-        layer.prompt({ 
-            title: '请输入密码', 
-            formType: 1,
-            success: function(layero, index) {
-                const input = document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input')
-                input.addEventListener('keydown', function(e) {
-                    if (e.keyCode === 13) {
-                        handlePrompt(input.value, index)
-                    }
-                })
-            }
-        }, 
-        function(password, index) {
-            handlePrompt(password, index)
-        })
-    } else {
-        vue(data.data)
-    }
-}
-
-auth()
-
-function handlePrompt(password, index) {
-    if (password && password !== '') {
-        let decryptData = null
-        try {
-            decryptData = JSON.parse(decrypt(data.data, password))
-        } catch (error) {
-            console.log('密码不正确')
-            layer.msg('密码不正确')
-        }
-        if (decryptData) {
-            layer.closeAll();
-            vue(decryptData, password)
-        }
-    }
+function tippyInit() {
+    tippy('[data-tippy-content]:not(.footer-tools a)', {
+        // placement: 'bottom',
+        interactive: true,
+        allowHTML: true,
+    })
+    
+    tippy('.footer-tools a')
 }
