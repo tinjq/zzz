@@ -6,21 +6,167 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nav 导航</title>
     <link rel="stylesheet" href="assets/css/iconfont/iconfont.css" type="text/css" />
+    <link rel="stylesheet" href="assets/css/element-plus-index.css" />
     <link rel="stylesheet" href="assets/css/s3Layer.css">
     <link rel="stylesheet" href="assets/css/nav.css">
-    <script src="data.txt" id="data-js"></script>
 </head>
 
 <body>
-    <div id="app"></div>
-    
+    <div id="app">
+        <aside v-if="menu">
+            <ul>
+                <li v-for="(item, i) in items" :key="item.title">
+                    <a :href="'#' + item.title + i" @click="expand($event)">
+                        <i v-if="editModel" class="iconfont icon-delete hover-enlarge"
+                            @click="deleteMenu($event,i)"></i>
+                        <i v-if="editModel" class="iconfont icon-edit hover-enlarge"
+                            @click="editSite($event, false, true, true, i)"></i>
+                        <i v-if="!editModel" class="iconfont icon-tag"></i>
+                        <span class="title nowrap-ellipsis">{{item.title}}</span>
+                        <i v-if="item.children && item.children.length > 0" class="iconfont icon-right"></i>
+                    </a>
+                    <ul v-if="item.children && item.children.length > 0">
+                        <li v-for="(child, j) in item.children" :key="child.title">
+                            <a :href="'#' + child.title + i + j">
+                                <i v-if="editModel" class="iconfont icon-delete hover-enlarge"
+                                    @click="deleteMenu($event,i,j)"></i>
+                                <i v-if="editModel" class="iconfont icon-edit hover-enlarge"
+                                    @click="editSite($event, false, false, true, i,j)"></i>
+                                <span class="title nowrap-ellipsis">{{child.title}}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <nav :class="menu ? 'menu' : 'no-menu'">
+            <a @click="menu = !menu" class="left">
+                <i class="iconfont icon-category hover-enlarge"></i>
+            </a>
+            <a href="javascript:;" class="center">
+            </a>
+            <a href="https://github.com/tinjq/zzz" target="_blank">
+                <i class="iconfont icon-github hover-enlarge"></i>
+            </a>
+        </nav>
+
+        <main :class="menu ? 'menu' : 'no-menu'">
+            <div id="content">
+                <div v-for="(item, i) in items" :key="item.title">
+                    <h4 :id="item.title + i">{{item.title}}
+                        <i v-if="editModel" class="iconfont icon-add hover-enlarge"
+                            @click="editSite($event, true, true, false, i)"></i>
+                    </h4>
+                    <div v-if="item.sites && item.sites.length > 0" class="site-cards">
+                        <div v-for="(site, j) in item.sites" :key="site.child">
+                            <el-tooltip :content="site.description ? site.description : site.title" raw-content>
+                                <div class="site-card"
+                                    :data-tippy-content="site.description ? site.description : site.title"
+                                    data-tippy-placement="bottom">
+                                    <a :href="site.href" target="_blank">
+                                        <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
+                                        <p class="nowrap-ellipsis">{{site.description}}</p>
+                                    </a>
+                                    <div v-if="editModel" class="edit-icons">
+                                        <i class="iconfont icon-edit hover-enlarge"
+                                            @click="editSite($event, true, false, true, i, j)"></i>
+                                        <i class="iconfont icon-delete hover-enlarge" @click="editDelete(i, j)"></i>
+                                    </div>
+                                </div>
+                            </el-tooltip>
+                        </div>
+                    </div>
+
+                    <div v-if="item.children && item.children.length > 0" v-for="(child, j) in item.children"
+                        :key="child.title">
+                        <h4 :id="child.title + i + j">{{child.title}}
+                            <i v-if="editModel" class="iconfont icon-add hover-enlarge"
+                                @click="editSite($event, true, true, false, i, j)"></i>
+                        </h4>
+                        <div class="site-cards">
+                            <div v-for="(site, k) in child.sites" :key="site.title">
+                                <el-tooltip :content="site.description ? site.description : site.title" raw-content>
+                                    <div class="site-card">
+                                        <a :href="site.href" target="_blank">
+                                            <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
+                                            <p class="nowrap-ellipsis">{{site.description}}</p>
+                                        </a>
+                                        <div v-if="editModel" class="edit-icons">
+                                            <i class="iconfont icon-edit hover-enlarge"
+                                                @click="editSite($event, true, false, true, i, j, k)"></i>
+                                            <i class="iconfont icon-delete hover-enlarge"
+                                                @click="editDelete(i, j, k)"></i>
+                                        </div>
+                                    </div>
+                                </el-tooltip>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="footer-tools flex-column">
+                <el-tooltip content="修改后要保存，否则刷新页面就丢了" placement="left">
+                    <a v-show="editModel" class="rounded-circle" @click="saveData">
+                        <i class="iconfont icon-save hover-enlarge"></i>
+                    </a>
+                </el-tooltip>
+                <el-tooltip content="切换修改模式" placement="left">
+                    <a class="rounded-circle" @click="editModel = !editModel">
+                        <i class="iconfont icon-edit hover-enlarge"></i>
+                    </a>
+                </el-tooltip>
+                <el-tooltip content="回到顶部" placement="left">
+                    <a href="javascript:window.scrollTo({ top: 0 });" class="rounded-circle">
+                        <i class="iconfont icon-to-up hover-enlarge"></i>
+                    </a>
+                </el-tooltip>
+                <!-- <el-tooltip content="设置" placement="left">
+                    <a class="rounded-circle" @click="dialogSettings = true">
+                        <i class="iconfont icon-settings hover-enlarge">设置</i>
+                    </a>
+                </el-tooltip>
+
+                <el-dialog v-model="dialogSettings" title="设置">
+                    <el-form>
+                        <el-form-item label="加密密码">
+                            <el-input v-model="" />
+                        </el-form-item>
+                    </el-form>
+                    <div class="dialog-footer">
+                        <el-button @click="dialogSettings = false">Cancel</el-button>
+                        <el-button type="primary" @click="dialogSettings = false">
+                            Confirm
+                        </el-button>
+                    </div>
+                </el-dialog> -->
+
+            </div>
+
+            <div class="marsk" onclick="this.style.display = 'none'">
+                <div class="popup" onclick="event.stopPropagation()">
+                    <div>标题：<input type="text" v-model="editData.title"></div>
+                    <div v-if="editFlag.info">链接：<input type="text" v-model="editData.href"></div>
+                    <div v-if="editFlag.info">图片：<input type="text" v-model="editData.icon"></div>
+                    <div v-if="editFlag.info">描述：<input type="text" v-model="editData.description"></div>
+                    <div class="btns">
+                        <button v-if="editFlag.btns" @click="editUpdate">修改</button>
+                        <button v-if="editFlag.btns" @click="insertBefore">前面插入</button>
+                        <button v-if="editFlag.btns" @click="insertAfter">后面插入</button>
+                        <button v-if="editFlag.child" @click="appendChild">添加子项</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
     <script src="assets/js/vue.global.prod.js"></script>
-    <script src="assets/js/popper.min.js"></script>
-    <script src="assets/js/tippy-bundle.umd.min.js"></script>
     <script src="assets/js/s3Layer.umd.min.js"></script>
     <script src="assets/js/crypto-js.min.js"></script>
     <script src="assets/js/zzz.js"></script>
-    <script src="assets/js/index-template.js"></script>
+    <script src="assets/js/element-plus.min.js"></script>
     <script src="assets/js/zzz-nav.js" id="zzz-nav"></script>
 </body>
 

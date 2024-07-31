@@ -1,31 +1,51 @@
 /**
  * 导航页面js
  */
-if (!data || !data.data) {
-    var data = { encrypt: null, data: [{ title: "示例分类" }] }
+
+// load data js txt file
+let filename = decodeURI(window.location.href.split("?")[1].split("=")[1].split('#')[0])
+const script = document.createElement('script')
+script.src = `datas/${filename}.txt`
+script.onload = () => {
+    loadDataSuccess(data)
+    document.title = filename
+}
+script.onerror = (err) => {
+    console.log('load error:', err)
+    loadDataSuccess(null)
+    document.title = filename
+}
+document.head.appendChild(script);
+
+
+function loadDataSuccess(data) {
+    if (!data || !data.data) {
+        var data = { data: [{ title: "默认分类" }] }
+    }
+    
+    if (data.crypto) {
+        layer.prompt({ 
+            title: '请输入密码', 
+            formType: 1,
+            success: function(layero, index) {
+                const input = document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input')
+                input.addEventListener('keydown', function(e) {
+                    if (e.keyCode === 13) {
+                        let pass = input.value
+                        handlePrompt(data, pass, index)
+                    }
+                })
+            }
+        }, 
+        function(password, index) {
+            handlePrompt(data, password, index)
+        })
+    } else {
+        vue(data)
+    }
 }
 
-if (data.crypto) {
-    layer.prompt({ 
-        title: '请输入密码', 
-        formType: 1,
-        success: function(layero, index) {
-            const input = document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input')
-            input.addEventListener('keydown', function(e) {
-                if (e.keyCode === 13) {
-                    handlePrompt(input.value, index)
-                }
-            })
-        }
-    }, 
-    function(password, index) {
-        handlePrompt(password, index)
-    })
-} else {
-    vue(data.data)
-}
-
-function handlePrompt(password, index) {
+function handlePrompt(data, password, index) {
     if (password && password !== '') {
         let decryptData = null
         try {
@@ -36,14 +56,15 @@ function handlePrompt(password, index) {
         }
         if (decryptData) {
             layer.closeAll();
-            vue(decryptData, password)
+            vue(data, decryptData, password)
         }
     }
 }
 
-function vue(decryptData, pass) {
+let editing = false
+function vue(data, decryptData, pass) {
     const { createApp, ref, reactive, toRaw } = Vue
-    const items = reactive(decryptData)
+    const items = reactive(decryptData || data.data)
     const editModel = ref(false)
     const menu = ref(true)
     const editFlag = reactive({ info: false, child: false, btns: false })
@@ -96,7 +117,7 @@ function vue(decryptData, pass) {
         }
     }
     
-    createApp({
+    const app = createApp({
         setup() {
             return {
                 items,
@@ -104,6 +125,7 @@ function vue(decryptData, pass) {
                 menu,
                 editFlag,
                 editData,
+                dialogSettings: ref(false),
                 expand: function (e) {
                     const classList = e.currentTarget.parentNode.classList
                     const expended = classList.contains('expanded')
@@ -129,6 +151,7 @@ function vue(decryptData, pass) {
                         current.description = editData.description
                     }
                     document.querySelector('.marsk').style.display = 'none'
+                    editing = true
                 },
                 editDelete: function (i, j, k) {
                     if (window.confirm('确定删除？')) {
@@ -139,6 +162,7 @@ function vue(decryptData, pass) {
                         } else {
                             items[i].children[j].sites.splice(k, 1)
                         }
+                        editing = true
                     }
                 },
                 insertBefore: function () {
@@ -159,6 +183,7 @@ function vue(decryptData, pass) {
                         }
                     }
                     document.querySelector('.marsk').style.display = 'none'
+                    editing = true
                 },
                 insertAfter: function () {
                     let newSite = getNewSite()
@@ -178,6 +203,7 @@ function vue(decryptData, pass) {
                         }
                     }
                     document.querySelector('.marsk').style.display = 'none'
+                    editing = true
                 },
                 deleteMenu: function (event, i, j) {
                     if (window.confirm('确定删除？')) {
@@ -190,6 +216,7 @@ function vue(decryptData, pass) {
                         } else {
                             items[i].children.splice(j, 1)
                         }
+                        editing = true
                     }
                     event.stopPropagation()
                 },
@@ -217,6 +244,7 @@ function vue(decryptData, pass) {
                         }
                     }
                     document.querySelector('.marsk').style.display = 'none'
+                    editing = true
                 },
                 saveData: function() {
                     layer.prompt({
@@ -229,12 +257,12 @@ function vue(decryptData, pass) {
                         btn2: function(index, layero) {
                             delete data['crypto']
                             data.data = toRaw(items)
-                            let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
-                            saveTxt(dataFileName(), saveContent)
+                            save2Txt(data)
                         }
                      }, 
                      function(password, index) {
                         if (password && password !== '') {
+                            layer.close(index);
                             try {
                                 data.data = encrypt(JSON.stringify(toRaw(items)), password)
                             } catch (error) {
@@ -242,27 +270,36 @@ function vue(decryptData, pass) {
                                 alert('encrypt error:' + error)
                                 return
                             }
-                            layer.close(index);
-                            data.crypto = 'AES'
-                            let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
-                            saveTxt(dataFileName(), saveContent)
+                            data.crypto = true
+                            save2Txt(data)
                         }
                     })
+                },
+                settings() {
+
                 }
             }
-        },
-        template: template
-    }).mount('#app')
-
-    tippyInit()
-}
-
-function tippyInit() {
-    tippy('[data-tippy-content]:not(.footer-tools a)', {
-        // placement: 'bottom',
-        interactive: true,
-        allowHTML: true,
+        }
     })
     
-    tippy('.footer-tools a')
+    app.use(ElementPlus)
+    app.mount('#app')
+
+    function save2Txt(data) {
+        let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
+        saveTxt(filename, saveContent, () => {
+            console.log('save file success')
+            // layer.msg('保存成功')
+            ElementPlus.ElMessage({ message: '保存成功', type: 'success', })
+            editing = false
+        })
+    }
 }
+
+
+window.addEventListener('beforeunload', (event) => {
+    // Cancel the event as stated by the standard.
+    if (editing) {
+        event.preventDefault();
+    }
+})

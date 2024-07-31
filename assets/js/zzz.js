@@ -1,8 +1,3 @@
-function dataFileName() {
-    let fileName = document.querySelector('#data-js').src
-    return fileName.replace(/(.*\/)*([^.]+).*/ig,"$2");
-}
-
 async function saveTxt(filename, saveContent, successCallback, errorCallback) {
     try {
         const opts = {
@@ -20,11 +15,15 @@ async function saveTxt(filename, saveContent, successCallback, errorCallback) {
         await writable.write(saveContent)
         await writable.close()
 
-        if (!successCallback) {
+        if (successCallback) {
+            successCallback()
+        } else {
             saveSuccess()
         }
     } catch (error) {
-        if (!errorCallback) {
+        if (errorCallback) {
+            errorCallback(error)
+        } else {
             saveError(error)
         }
     }
