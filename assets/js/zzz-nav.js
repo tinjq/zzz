@@ -3,7 +3,13 @@
  */
 
 // load data js txt file
-let filename = decodeURI(window.location.href.split("?")[1].split("=")[1].split('#')[0])
+let param = window.location.href.split("?")[1]
+if (!param || !param.includes('=')) {
+    param = 'nav'
+} else {
+    param = param.split("=")[1].split('#')[0]
+}
+let filename = decodeURI(param)
 const script = document.createElement('script')
 script.src = `datas/${filename}.txt`
 script.onload = () => {
@@ -11,7 +17,6 @@ script.onload = () => {
     document.title = filename
 }
 script.onerror = (err) => {
-    console.log('load error:', err)
     loadDataSuccess(null)
     document.title = filename
 }
@@ -22,22 +27,24 @@ function loadDataSuccess(data) {
     if (!data || !data.data) {
         var data = { data: [{ title: "默认分类" }] }
     }
-    
-    if (data.crypto) {
-        layer.prompt({ 
-            title: '请输入密码', 
+    if (!data.settings) {
+        data.settings = { showEmptyCategory: true, crypto: false }
+    }
+
+    if (data.settings.crypto) {
+        layer.prompt({
+            title: '请输入密码',
             formType: 1,
-            success: function(layero, index) {
+            success: function (layero, index) {
                 const input = document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input')
-                input.addEventListener('keydown', function(e) {
+                input.addEventListener('keydown', function (e) {
                     if (e.keyCode === 13) {
                         let pass = input.value
                         handlePrompt(data, pass, index)
                     }
                 })
             }
-        }, 
-        function(password, index) {
+        }, function (password, index) {
             handlePrompt(data, password, index)
         })
     } else {
@@ -62,18 +69,22 @@ function handlePrompt(data, password, index) {
 }
 
 let editing = false
-function vue(data, decryptData, pass) {
+let settingsChanged = false
+function vue(data, decryptData, password) {
     const { createApp, ref, reactive, toRaw } = Vue
     const items = reactive(decryptData || data.data)
-    const editModel = ref(false)
-    const menu = ref(true)
+    const settings = reactive(data.settings)
     const editFlag = reactive({ info: false, child: false, btns: false })
-    const editData = reactive({ title: '', href: '', icon: '', description: '', i: -1, j: -1, k: -1 })
-    
+    const editData = reactive({ title: '', href: '', icon: '', remark:'', description: '', i: -1, j: -1, k: -1 })
+    const controlData = reactive({
+        editModel: false, showMenu: true, showSettings: false,
+        showEmptyCategory: data.showEmptyCategory, crypto: data.crypto, password: password
+    })
+
     if (window.screen.width < 600) {
-        menu.value = false
+        controlData.showMenu = false
     }
-    
+
     function getCurrent(i, j, k) {
         if (!editFlag.info) {
             if (j === undefined) {
@@ -97,35 +108,35 @@ function vue(data, decryptData, pass) {
             }
         }
     }
-    
+
     function populateEditData(i, j, k) {
         let current = getCurrent(i, j, k)
         editData.title = current.title
         editData.href = current.href
         editData.icon = current.icon
+        editData.remark = current.remark
         editData.description = current.description
         editData.i = i
         editData.j = j
         editData.k = k
     }
-    
+
     function getNewSite() {
         if (editFlag.info) {
-            return { title: editData.title, href: editData.href, icon: editData.icon, description: editData.description }
+            return { title: editData.title, href: editData.href, icon: editData.icon, remark: editData.remark, description: editData.description }
         } else {
             return { title: editData.title }
         }
     }
-    
+
     const app = createApp({
         setup() {
             return {
                 items,
-                editModel,
-                menu,
                 editFlag,
                 editData,
-                dialogSettings: ref(false),
+                controlData,
+                settings,
                 expand: function (e) {
                     const classList = e.currentTarget.parentNode.classList
                     const expended = classList.contains('expanded')
@@ -148,6 +159,7 @@ function vue(data, decryptData, pass) {
                     if (editFlag.info) {
                         current.href = editData.href
                         current.icon = editData.icon
+                        current.remark = editData.remark
                         current.description = editData.description
                     }
                     document.querySelector('.marsk').style.display = 'none'
@@ -246,42 +258,62 @@ function vue(data, decryptData, pass) {
                     document.querySelector('.marsk').style.display = 'none'
                     editing = true
                 },
-                saveData: function() {
-                    layer.prompt({
-                        title: '使用当前密码加密保存', 
-                        formType: 1,
-                        btn: ['确定', '不加密', '取消'],
-                        success: function() {
-                            document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input').value = pass || ''
-                        },
-                        btn2: function(index, layero) {
-                            delete data['crypto']
-                            data.data = toRaw(items)
-                            save2Txt(data)
+                saveData: function () {
+                    if (settings.crypto && controlData.password && controlData.password.length > 0) {
+                        try {
+                            data.data = encrypt(JSON.stringify(toRaw(items)), controlData.password)
+                        } catch (error) {
+                            console.log('encrypt error', error)
+                            alert('encrypt error:' + error)
+                            return
                         }
-                     }, 
-                     function(password, index) {
-                        if (password && password !== '') {
-                            layer.close(index);
-                            try {
-                                data.data = encrypt(JSON.stringify(toRaw(items)), password)
-                            } catch (error) {
-                                console.log('encrypt error', error)
-                                alert('encrypt error:' + error)
-                                return
-                            }
-                            data.crypto = true
-                            save2Txt(data)
-                        }
-                    })
+                    } else {
+                        data.data = toRaw(items)
+                    }
+                    save2Txt(data)
                 },
-                settings() {
-
+                showSettingsForm() {
+                    if (!settingsChanged) {
+                        if (controlData.showEmptyCategory !== settings.showEmptyCategory) {
+                            controlData.showEmptyCategory = settings.showEmptyCategory
+                        }
+                        if (controlData.crypto !== settings.crypto) {
+                            controlData.crypto = settings.crypto
+                        }
+                        if (password !== controlData.password) {
+                            controlData.password = password
+                        }
+                        if (settings.cardWidth !== controlData.cardWidth) {
+                            controlData.cardWidth = settings.cardWidth
+                        }
+                    }
+                    controlData.showSettings = true
+                },
+                confirmSettings() {
+                    if (settings.showEmptyCategory !== controlData.showEmptyCategory) {
+                        settings.showEmptyCategory = controlData.showEmptyCategory
+                        settingsChanged = true
+                    }
+                    if (settings.crypto !== controlData.crypto) {
+                        settings.crypto = controlData.crypto
+                        settingsChanged = true
+                    }
+                    if (settings.crypto && password !== controlData.password) {
+                        settingsChanged = true
+                    }
+                    if (settings.cardWidth !== controlData.cardWidth) {
+                        settings.cardWidth = Number(controlData.cardWidth)
+                        settingsChanged = true
+                    }
+                    controlData.showSettings = false
+                },
+                tooltipContent(site) {
+                    return site.description ? site.description : site.remark ? site.remark : site.title
                 }
             }
         }
     })
-    
+
     app.use(ElementPlus)
     app.mount('#app')
 
@@ -292,6 +324,19 @@ function vue(data, decryptData, pass) {
             // layer.msg('保存成功')
             ElementPlus.ElMessage({ message: '保存成功', type: 'success', })
             editing = false
+            settingsChanged = false
+        }, (e) => {
+            console.log('e name', e.name)
+            if ("AbortError" !== e.name) {
+                console.log('Use a link download')
+                const blob = new Blob([saveContent], {type: "text/plain;charset=utf-8"});
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.rel = 'noopener'
+                a.href = url
+                a.download = filename
+                a.click()
+            }
         })
     }
 }
@@ -299,7 +344,8 @@ function vue(data, decryptData, pass) {
 
 window.addEventListener('beforeunload', (event) => {
     // Cancel the event as stated by the standard.
-    if (editing) {
+    if (editing || settingsChanged) {
+        console.log('event.preventDefault')
         event.preventDefault();
     }
 })

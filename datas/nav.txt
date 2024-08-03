@@ -8,19 +8,22 @@ var data = {
                     "title": "zzz",
                     "href": "?d=zzz",
                     "icon": "",
-                    "description": "zzz"
+                    "description": "zzz",
+                    "remark": "?d=zzz"
                 },
                 {
                     "title": "acc",
-                    "href": "pages/acc.html",
+                    "href": "?d=acc",
                     "icon": "",
-                    "description": "acc"
+                    "description": "acc",
+                    "remark": "?d=acc"
                 },
                 {
                     "title": "有道词典",
                     "href": "https://www.youdao.com/",
                     "icon": "",
-                    "description": "https://www.youdao.com/"
+                    "description": "https://www.youdao.com/",
+                    "remark": "https://www.youdao.com/"
                 }
             ]
         },
@@ -35,19 +38,22 @@ var data = {
                             "title": "GitHub",
                             "icon": "",
                             "href": "https://github.com/",
-                            "description": "GitHub 开源社区"
+                            "description": "GitHub 开源社区",
+                            "remark": "GitHub 开源社区"
                         },
                         {
                             "title": "GitCode",
                             "icon": "",
                             "href": "https://gitcode.com/",
-                            "description": "中文开发者代码社区"
+                            "description": "中文开发者代码社区",
+                            "remark": "中文开发者代码社区"
                         },
                         {
                             "title": "码云",
                             "icon": "",
                             "href": "https://gitee.com/",
-                            "description": "基于 Git 的代码托管和研发协作平台"
+                            "description": "基于 Git 的代码托管和研发协作平台",
+                            "remark": "基于 Git 的代码托管和研发协作平台"
                         }
                     ]
                 },
@@ -58,13 +64,15 @@ var data = {
                             "title": "iconfont",
                             "icon": "",
                             "href": "https://www.iconfont.cn/manage/index?manage_type=myprojects",
-                            "description": "阿里巴巴矢量图标库"
+                            "description": "阿里巴巴矢量图标库",
+                            "remark": "阿里巴巴矢量图标库"
                         },
                         {
                             "title": "Font Awesome",
                             "icon": "",
                             "href": "https://fontawesome.com/",
-                            "description": "https://fontawesome.com/"
+                            "description": "https://fontawesome.com/",
+                            "remark": "https://fontawesome.com/"
                         }
                     ]
                 }
@@ -81,11 +89,17 @@ var data = {
                             "title": "有道词典",
                             "icon": "",
                             "href": "https://www.youdao.com/",
-                            "description": "有道在线翻译"
+                            "description": "有道在线翻译",
+                            "remark": "有道在线翻译"
                         }
                     ]
                 }
             ]
         }
-    ]
+    ],
+    "settings": {
+        "showEmptyCategory": false,
+        "crypto": false,
+        "cardWidth": 0
+    }
 }
