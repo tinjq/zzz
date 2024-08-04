@@ -32,37 +32,33 @@ function loadDataSuccess(data) {
     }
 
     if (data.settings.crypto) {
-        layer.prompt({
-            title: '请输入密码',
-            formType: 1,
-            success: function (layero, index) {
-                const input = document.querySelector('.layui-layer-prompt .layui-layer-content .layui-layer-input')
-                input.addEventListener('keydown', function (e) {
-                    if (e.keyCode === 13) {
-                        let pass = input.value
-                        handlePrompt(data, pass, index)
-                    }
-                })
+        const marsk = document.querySelector('.marsk.confirm-pass')
+        marsk.style.display = 'block'
+        const input = marsk.querySelector('input[type=password]')
+        input.focus()
+        input.addEventListener('keydown', function (e) {
+            if (e.key === "Enter") {
+                handlePrompt()
             }
-        }, function (password, index) {
-            handlePrompt(data, password, index)
         })
     } else {
         vue(data)
     }
 }
 
-function handlePrompt(data, password, index) {
+function handlePrompt() {
+    const marsk = document.querySelector('.marsk.confirm-pass')
+    const password = marsk.querySelector('input[type=password]').value
     if (password && password !== '') {
         let decryptData = null
         try {
             decryptData = JSON.parse(decrypt(data.data, password))
         } catch (error) {
             console.log('密码不正确')
-            layer.msg('密码不正确')
+            alert('密码不正确')
         }
         if (decryptData) {
-            layer.closeAll();
+            marsk.style.display = 'none'
             vue(data, decryptData, password)
         }
     }
@@ -72,14 +68,19 @@ let editing = false
 let settingsChanged = false
 function vue(data, decryptData, password) {
     const { createApp, ref, reactive, toRaw } = Vue
+    const { computePosition, flip, shift, offset, arrow, } = FloatingUIDOM
+
     const items = reactive(decryptData || data.data)
     const settings = reactive(data.settings)
     const editFlag = reactive({ info: false, child: false, btns: false })
     const editData = reactive({ title: '', href: '', icon: '', remark:'', description: '', i: -1, j: -1, k: -1 })
     const controlData = reactive({
-        editModel: false, showMenu: true, showSettings: false,
-        showEmptyCategory: data.showEmptyCategory, crypto: data.crypto, password: password
+        editModel: false, showMenu: true, showSettings: false, showMask: false,
+        showEmptyCategory: data.showEmptyCategory || true, crypto: data.crypto || false, password: password
     })
+    const isShowTip = ref(false)
+    const tipContent = ref('')
+    let timeout = null
 
     if (window.screen.width < 600) {
         controlData.showMenu = false
@@ -137,6 +138,8 @@ function vue(data, decryptData, password) {
                 editData,
                 controlData,
                 settings,
+                isShowTip,
+                tipContent,
                 expand: function (e) {
                     const classList = e.currentTarget.parentNode.classList
                     const expended = classList.contains('expanded')
@@ -150,7 +153,7 @@ function vue(data, decryptData, password) {
                     editFlag.child = child
                     editFlag.btns = btns
                     populateEditData(i, j, k)
-                    document.querySelector('.marsk').style.display = 'block'
+                    controlData.showMask = true
                     event.stopPropagation()
                 },
                 editUpdate: function () {
@@ -162,7 +165,7 @@ function vue(data, decryptData, password) {
                         current.remark = editData.remark
                         current.description = editData.description
                     }
-                    document.querySelector('.marsk').style.display = 'none'
+                    controlData.showMask = false
                     editing = true
                 },
                 editDelete: function (i, j, k) {
@@ -194,7 +197,7 @@ function vue(data, decryptData, password) {
                             items[editData.i].children.splice(editData.j, 0, newSite)
                         }
                     }
-                    document.querySelector('.marsk').style.display = 'none'
+                    controlData.showMask = false
                     editing = true
                 },
                 insertAfter: function () {
@@ -214,7 +217,7 @@ function vue(data, decryptData, password) {
                             items[editData.i].children.splice(editData.j + 1, 0, newSite)
                         }
                     }
-                    document.querySelector('.marsk').style.display = 'none'
+                    controlData.showMask = false
                     editing = true
                 },
                 deleteMenu: function (event, i, j) {
@@ -255,7 +258,7 @@ function vue(data, decryptData, password) {
                             items[editData.i].children.push(newSite)
                         }
                     }
-                    document.querySelector('.marsk').style.display = 'none'
+                    controlData.showMask = false
                     editing = true
                 },
                 saveData: function () {
@@ -287,9 +290,12 @@ function vue(data, decryptData, password) {
                             controlData.cardWidth = settings.cardWidth
                         }
                     }
+                    controlData.showMask = false
                     controlData.showSettings = true
                 },
                 confirmSettings() {
+                    controlData.showEmptyCategory = controlData.showEmptyCategory === true || controlData.showEmptyCategory === 'true'
+                    controlData.crypto = controlData.crypto === true || controlData.crypto === 'true'
                     if (settings.showEmptyCategory !== controlData.showEmptyCategory) {
                         settings.showEmptyCategory = controlData.showEmptyCategory
                         settingsChanged = true
@@ -309,20 +315,73 @@ function vue(data, decryptData, password) {
                 },
                 tooltipContent(site) {
                     return site.description ? site.description : site.remark ? site.remark : site.title
+                },
+                showTip(event) {
+                    if (timeout) {
+                        clearTimeout(timeout)
+                    }
+                    const target = event.target
+                    tipContent.value = target.getAttribute('tip-content')
+                    isShowTip.value = true
+                    const placement = target.getAttribute('tip-placement')
+                    showTooltip(target, placement)
+                },
+                hideTip() {
+                    if (timeout) {
+                        clearTimeout(timeout)
+                    }
+                    timeout = setTimeout(() => {
+                        isShowTip.value = false
+                    }, 100)
+                },
+                enterTooltip() {
+                    if (timeout) {
+                        clearTimeout(timeout)
+                    }
+                    isShowTip.value = true
                 }
             }
         }
     })
 
-    app.use(ElementPlus)
     app.mount('#app')
+
+    function showTooltip(reference, tipPlacement) {
+        const tooltip = document.querySelector('#tooltip');
+        const arrowElement = tooltip.querySelector('#arrow');
+        computePosition(reference, tooltip, {
+            placement: tipPlacement,
+            middleware: [offset(6), flip(), shift({ padding: 5 }), arrow({ element: arrowElement }),],
+        }).then(({ x, y, placement, middlewareData }) => {
+            Object.assign(tooltip.style, {
+                left: `${x}px`,
+                top: `${y}px`,
+            });
+
+            // Accessing the data
+            const { x: arrowX, y: arrowY } = middlewareData.arrow;
+
+            const staticSide = {
+                top: 'bottom',
+                right: 'left',
+                bottom: 'top',
+                left: 'right',
+            }[placement.split('-')[0]];
+
+            Object.assign(arrowElement.style, {
+                left: arrowX != null ? `${arrowX}px` : '',
+                top: arrowY != null ? `${arrowY}px` : '',
+                right: '',
+                bottom: '',
+                [staticSide]: '-4px',
+            });
+        });
+    }
 
     function save2Txt(data) {
         let saveContent = 'var data = ' + JSON.stringify(data, null, 4)
         saveTxt(filename, saveContent, () => {
             console.log('save file success')
-            // layer.msg('保存成功')
-            ElementPlus.ElMessage({ message: '保存成功', type: 'success', })
             editing = false
             settingsChanged = false
         }, (e) => {
@@ -341,11 +400,9 @@ function vue(data, decryptData, password) {
     }
 }
 
-
 window.addEventListener('beforeunload', (event) => {
     // Cancel the event as stated by the standard.
     if (editing || settingsChanged) {
-        console.log('event.preventDefault')
         event.preventDefault();
     }
 })
