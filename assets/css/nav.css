@@ -4,6 +4,10 @@
     scroll-behavior: smooth;
 }
 
+body {
+    font-family: "Microsoft YaHei",Arial,Helvetica,sans-serif,"宋体";
+}
+
 html, body, #app {
     height: 100%;
 }
@@ -42,16 +46,16 @@ aside ul:first-child {
     scrollbar-width: none;
 }
 
-.iconfont {
+aside .iconfont {
     font-size: 0.8rem;
-}
-
-aside .iconfont, .site-card .iconfont {
-    margin-right: .3rem;
 }
 
 section .iconfont {
     font-size: 1rem;
+}
+
+aside .iconfont, section .iconfont {
+    margin-right: 0.3rem;
 }
 
 .footer-tools>.rounded-circle .iconfont {
@@ -126,7 +130,7 @@ main header a .iconfont{
 main section {
     flex: 1;
     overflow-y: auto;
-    padding: .5rem;
+    padding: 0.5rem;
 }
 
 main section h4 {
@@ -143,16 +147,29 @@ main section h4 {
 
 .site-cards>div {
     width: 16.666%;
+    position: relative;
 }
 
 .site-card {
     background-color: white;
-    margin: 0 .3125rem .625rem;
+    margin: 0 0.3125rem 0.625rem;
     padding: 0.5rem;
-    border-radius: .1875rem;
+    border-radius: 0.1875rem;
     position: relative;
     border: 1px solid transparent;
     line-height: 1.25rem;
+    display: flex;
+}
+
+.site-card>img {
+    max-width: 2rem;
+    max-height: 2rem;
+    margin: auto 0.5rem auto 0;
+}
+
+.site-card>div {
+    flex: 1;
+    overflow: hidden;
 }
 
 .site-card:hover {
@@ -167,10 +184,10 @@ main section h4 {
     font-size: 0.75rem
 }
 
-.site-card .edit-icons {
+.site-cards .edit-icons {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 0.3125rem;
 }
 
 .footer-tools {
@@ -192,7 +209,7 @@ main section h4 {
     background-color: #f9f9f9;
     text-align: center;
     line-height: 2.5rem;
-    margin: .25rem;
+    margin: 0.25rem;
 }
 
 .marsk {
@@ -229,7 +246,7 @@ main section h4 {
 .popup>div {
     display: flex;
     line-height: 2.25rem;
-    margin: .25rem 0;
+    margin: 0.25rem 0;
 }
 
 .popup div input {

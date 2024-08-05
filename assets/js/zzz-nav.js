@@ -75,7 +75,7 @@ function vue(data, decryptData, password) {
     const editFlag = reactive({ info: false, child: false, btns: false })
     const editData = reactive({ title: '', href: '', icon: '', remark:'', description: '', i: -1, j: -1, k: -1 })
     const controlData = reactive({
-        editModel: false, showMenu: true, showSettings: false, showMask: false,
+        editModel: false, showMenu: false, showSettings: false, showMask: false,
         showEmptyCategory: data.showEmptyCategory || true, crypto: data.crypto || false, password: password
     })
     const isShowTip = ref(false)

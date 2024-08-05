@@ -11,7 +11,7 @@
 
 <body>
     <div id="app">
-        <aside v-if="controlData.showMenu">
+        <aside v-show="controlData.showMenu" style="display: none;">
             <ul>
                 <!-- :key -->
                 <li v-for="(item, i) in items" :key="item.title">
@@ -48,17 +48,19 @@
                         <i v-if="controlData.editModel" class="iconfont icon-add" @click="editSite($event, true, true, false, i)"></i>
                     </h4>
                     <div v-if="item.sites && item.sites.length > 0" class="site-cards">
-                        <div v-for="(site, j) in item.sites" :key="site.title" :style="settings.cardWidth ? `width:${settings.cardWidth}%` : ''">
-                            <div class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" 
-                                :tip-content="tooltipContent(site)" tip-placement="bottom">
-                                <a :href="site.href" target="_blank">
+                        <div v-for="(site, j) in item.sites" :key="site.title" 
+                            :style="settings.cardWidth ? `width:${settings.cardWidth}%` : ''">
+                            <a class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" 
+                                :tip-content="tooltipContent(site)" tip-placement="bottom" :href="site.href" target="_blank">
+                                <img v-if="site.icon && site.icon.length > 0" :src="site.icon" loading="lazy">
+                                <div>
                                     <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
                                     <p class="nowrap-ellipsis">{{site.remark}}</p>
-                                </a>
-                                <div v-if="controlData.editModel" class="edit-icons">
-                                    <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j)"></i>
-                                    <i class="iconfont icon-delete" @click="editDelete(i, j)"></i>
                                 </div>
+                            </a>
+                            <div v-if="controlData.editModel" class="edit-icons">
+                                <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j)"></i>
+                                <i class="iconfont icon-delete" @click="editDelete(i, j)"></i>
                             </div>
                         </div>
                     </div>
@@ -71,16 +73,17 @@
                         <div class="site-cards">
                             <div v-for="(site, k) in child.sites" :key="site.title" 
                                 :style="settings.cardWidth ? `width:${settings.cardWidth}%` : ''">
-                                <div class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" 
-                                    :tip-content="tooltipContent(site)" tip-placement="bottom">
-                                    <a :href="site.href" target="_blank">
+                                <a class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" 
+                                    :tip-content="tooltipContent(site)" tip-placement="bottom" :href="site.href" target="_blank">
+                                    <img v-if="site.icon && site.icon.length > 0" :src="site.icon" loading="lazy">
+                                    <div>
                                         <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
                                         <p class="nowrap-ellipsis">{{site.remark}}</p>
-                                    </a>
-                                    <div v-if="controlData.editModel" class="edit-icons">
-                                        <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j, k)"></i>
-                                        <i class="iconfont icon-delete" @click="editDelete(i, j, k)"></i>
                                     </div>
+                                </a>
+                                <div v-if="controlData.editModel" class="edit-icons" @click="event.stopPropagation()">
+                                    <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j, k)"></i>
+                                    <i class="iconfont icon-delete" @click="editDelete(i, j, k)"></i>
                                 </div>
                             </div>
                         </div>
