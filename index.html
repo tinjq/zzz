@@ -50,14 +50,14 @@
                     <div v-if="item.sites && item.sites.length > 0" class="site-cards">
                         <div v-for="(site, j) in item.sites" :key="site.title" 
                             :style="settings.cardWidth ? `width:${settings.cardWidth}%` : ''">
-                            <a class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" 
-                                :tip-content="tooltipContent(site)" tip-placement="bottom" :href="site.href" target="_blank">
+                            <div class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" @click="clickCard(site)"
+                                :tip-content="tooltipContent(site)" tip-placement="bottom">
                                 <img v-if="site.icon && site.icon.length > 0" :src="site.icon" loading="lazy">
                                 <div>
                                     <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
                                     <p class="nowrap-ellipsis">{{site.remark}}</p>
                                 </div>
-                            </a>
+                            </div>
                             <div v-if="controlData.editModel" class="edit-icons">
                                 <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j)"></i>
                                 <i class="iconfont icon-delete" @click="editDelete(i, j)"></i>
@@ -65,29 +65,31 @@
                         </div>
                     </div>
 
-                    <div v-if="item.children && item.children.length > 0" v-for="(child, j) in item.children" :key="child.title">
-                        <h4 v-if="settings.showEmptyCategory || (child.sites && child.sites.length > 0)" :id="child.title + i + j">
-                            <i class="iconfont icon-tag no-scale"></i> {{child.title}}
-                            <i v-if="controlData.editModel" class="iconfont icon-add" @click="editSite($event, true, true, false, i, j)"></i>
-                        </h4>
-                        <div class="site-cards">
-                            <div v-for="(site, k) in child.sites" :key="site.title" 
-                                :style="settings.cardWidth ? `width:${settings.cardWidth}%` : ''">
-                                <a class="site-card" @mouseenter="showTip($event)" @mouseleave="hideTip" 
-                                    :tip-content="tooltipContent(site)" tip-placement="bottom" :href="site.href" target="_blank">
-                                    <img v-if="site.icon && site.icon.length > 0" :src="site.icon" loading="lazy">
-                                    <div>
-                                        <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
-                                        <p class="nowrap-ellipsis">{{site.remark}}</p>
+                    <template v-for="(child, j) in item.children" :key="child.title">
+                        <div v-if="settings.showEmptyCategory || (child.sites && child.sites.length > 0)">
+                            <h4 :id="child.title + i + j">
+                                <i class="iconfont icon-tag no-scale"></i> {{child.title}}
+                                <i v-if="controlData.editModel" class="iconfont icon-add" @click="editSite($event, true, true, false, i, j)"></i>
+                            </h4>
+                            <div class="site-cards">
+                                <div v-for="(site, k) in child.sites" :key="site.title" 
+                                    :style="settings.cardWidth ? `width:${settings.cardWidth}%` : ''">
+                                    <div class="site-card" @mouseenter="showTip($event)" @click="clickCard(site)"
+                                        @mouseleave="hideTip" :tip-content="tooltipContent(site)" tip-placement="bottom">
+                                        <img v-if="site.icon && site.icon.length > 0" :src="site.icon" loading="lazy">
+                                        <div>
+                                            <p class="nowrap-ellipsis"><strong>{{site.title}}</strong></p>
+                                            <p class="nowrap-ellipsis">{{site.remark}}</p>
+                                        </div>
                                     </div>
-                                </a>
-                                <div v-if="controlData.editModel" class="edit-icons" @click="event.stopPropagation()">
-                                    <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j, k)"></i>
-                                    <i class="iconfont icon-delete" @click="editDelete(i, j, k)"></i>
+                                    <div v-if="controlData.editModel" class="edit-icons" @click="event.stopPropagation()">
+                                        <i class="iconfont icon-edit" @click="editSite($event, true, false, true, i, j, k)"></i>
+                                        <i class="iconfont icon-delete" @click="editDelete(i, j, k)"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </template>
 
                 </div>
             </section>

@@ -339,6 +339,11 @@ function vue(data, decryptData, password) {
                         clearTimeout(timeout)
                     }
                     isShowTip.value = true
+                },
+                clickCard(site) {
+                    if (site.href && site.href.length) {
+                        window.open(site.href, '_blank')
+                    }
                 }
             }
         }

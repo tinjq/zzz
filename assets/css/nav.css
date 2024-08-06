@@ -159,6 +159,7 @@ main section h4 {
     border: 1px solid transparent;
     line-height: 1.25rem;
     display: flex;
+    cursor: pointer;
 }
 
 .site-card>img {
